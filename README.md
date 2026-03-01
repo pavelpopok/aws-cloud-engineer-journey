@@ -82,6 +82,28 @@
 
 ---
 
+### Week 5: Terraform — Codifying ECS Stack
+**Topics Covered:**
+- Terraform project structure (providers, variables, outputs, main)
+- Terraform state management
+- Resource dependency graphs and references
+- VPC and networking layer in HCL
+- Security group chaining in Terraform
+- ECS Fargate + ALB fully defined as code
+- IAM roles via Terraform
+- Infrastructure destroy and rebuild cycle
+
+**Lab Projects:**
+- Complete ECS Fargate stack deployed entirely by Terraform
+- Full destroy/rebuild cycle proving infrastructure reproducibility
+
+**Time Investment:** ~X hours over 6 days
+**Cost:** ~$X
+
+**Learning Note:** Same infrastructure as Week 4 built in a fraction of the time. Terraform state clicked through practice, not theory — existing resources showed zero changes on reapply, only new additions were touched.
+
+---
+
 ## Current Skill Level
 
 **Cloud Platforms:**
