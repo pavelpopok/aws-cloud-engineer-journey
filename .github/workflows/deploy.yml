@@ -17,9 +17,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Confirm we're running
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Verify AWS authentication
         run: |
-          echo "Pipeline triggered"
-          echo "Repository: ${{ github.repository }}"
-          echo "Branch: ${{ github.ref_name }}"
-          echo "Commit: ${{ github.sha }}"
+          aws sts get-caller-identity
+          echo "Successfully authenticated with AWS"
+
+      - name: Login to ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Confirm ECR login
+        run: |
+          echo "ECR Registry: ${{ steps.login-ecr.outputs.registry }}"
+          aws ecr describe-repositories --region eu-central-1 \
+            --query 'repositories[].repositoryName' --output text
