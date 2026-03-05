@@ -7,7 +7,7 @@ from flask import Flask, jsonify
 app = Flask(__name__)
 
 # Read environment variable with default value
-APP_NAME = os.getenv("APP_NAME", "Flask Docker App - Week 6")
+APP_NAME = os.getenv("APP_NAME", "Flask Docker App - Week 6 CI/CD!")
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 
 visit_count = 0
