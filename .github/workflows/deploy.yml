@@ -52,3 +52,51 @@ jobs:
           
           echo "Pushed: $FULL_IMAGE"
           echo "Pushed: $LATEST_IMAGE"
+
+      - name: Deploy to ECS
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          TASK_FAMILY="week5-task"
+          NEW_IMAGE="$REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          
+          TASK_DEF=$(aws ecs describe-task-definition \
+            --task-definition $TASK_FAMILY \
+            --region ${{ secrets.AWS_REGION }} \
+            --query 'taskDefinition' \
+            --output json)
+          
+          NEW_TASK_DEF=$(echo $TASK_DEF | python3 -c "
+          import json, sys
+          td = json.load(sys.stdin)
+          td['containerDefinitions'][0]['image'] = '$NEW_IMAGE'
+          for key in ['taskDefinitionArn', 'revision', 'status', 'requiresAttributes', 'compatibilities', 'registeredAt', 'registeredBy']:
+              td.pop(key, None)
+          print(json.dumps(td))
+          ")
+          
+          NEW_TASK_ARN=$(aws ecs register-task-definition \
+            --region ${{ secrets.AWS_REGION }} \
+            --cli-input-json "$NEW_TASK_DEF" \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+          
+          echo "New task definition: $NEW_TASK_ARN"
+          
+          aws ecs update-service \
+            --region ${{ secrets.AWS_REGION }} \
+            --cluster week5-cluster \
+            --service week5-service \
+            --task-definition $NEW_TASK_ARN \
+            --force-new-deployment
+          
+          echo "Deployment triggered"
+
+      - name: Wait for deployment to complete
+        run: |
+          echo "Waiting for ECS service to stabilize..."
+          aws ecs wait services-stable \
+            --region ${{ secrets.AWS_REGION }} \
+            --cluster week5-cluster \
+            --services week5-service
+          echo "Deployment complete"
