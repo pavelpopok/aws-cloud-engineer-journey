@@ -6,8 +6,8 @@ on:
     branches:
       - main
     paths:
-      - 'week6/**'
-      - '.github/workflows/deploy.yml'
+      - "week6/**"
+      - ".github/workflows/deploy.yml"
 
 env:
   ECR_REPOSITORY: week6-flask
@@ -16,7 +16,7 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -32,6 +32,24 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run tests
+        run: |
+          cd week6
+          pip install -r requirements.txt
+          pytest test_app.py -v
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "Pipeline failed!"
+          echo "Commit: ${{ github.sha }}"
+          echo "Author: ${{ github.actor }}"
+
       - name: Build Docker image
         run: |
           docker build -t $ECR_REPOSITORY:$IMAGE_TAG ./week6/
@@ -43,13 +61,13 @@ jobs:
         run: |
           FULL_IMAGE="$REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
           LATEST_IMAGE="$REGISTRY/$ECR_REPOSITORY:latest"
-          
+
           docker tag $ECR_REPOSITORY:$IMAGE_TAG $FULL_IMAGE
           docker tag $ECR_REPOSITORY:$IMAGE_TAG $LATEST_IMAGE
-          
+
           docker push $FULL_IMAGE
           docker push $LATEST_IMAGE
-          
+
           echo "Pushed: $FULL_IMAGE"
           echo "Pushed: $LATEST_IMAGE"
 
@@ -59,13 +77,13 @@ jobs:
         run: |
           TASK_FAMILY="week5-task"
           NEW_IMAGE="$REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          
+
           TASK_DEF=$(aws ecs describe-task-definition \
             --task-definition $TASK_FAMILY \
             --region ${{ secrets.AWS_REGION }} \
             --query 'taskDefinition' \
             --output json)
-          
+
           NEW_TASK_DEF=$(echo $TASK_DEF | python3 -c "
           import json, sys
           td = json.load(sys.stdin)
@@ -74,22 +92,22 @@ jobs:
               td.pop(key, None)
           print(json.dumps(td))
           ")
-          
+
           NEW_TASK_ARN=$(aws ecs register-task-definition \
             --region ${{ secrets.AWS_REGION }} \
             --cli-input-json "$NEW_TASK_DEF" \
             --query 'taskDefinition.taskDefinitionArn' \
             --output text)
-          
+
           echo "New task definition: $NEW_TASK_ARN"
-          
+
           aws ecs update-service \
             --region ${{ secrets.AWS_REGION }} \
             --cluster week5-cluster \
             --service week5-service \
             --task-definition $NEW_TASK_ARN \
             --force-new-deployment
-          
+
           echo "Deployment triggered"
 
       - name: Wait for deployment to complete
