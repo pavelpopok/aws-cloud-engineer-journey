@@ -104,6 +104,15 @@
 
 ---
 
+## Week 6: CI/CD with GitHub Actions
+- Automated pipeline: code push → Docker build → ECR push → ECS deployment
+- Tests run before every deployment (pipeline fails if tests fail)
+- Zero manual steps from code change to production
+- Tools: GitHub Actions, aws-actions/configure-aws-credentials, aws-actions/amazon-ecr-login
+
+---
+
+
 ## Current Skill Level
 
 **Cloud Platforms:**
@@ -144,10 +153,6 @@
 ---
 
 ## Planned Next Steps
-
-**Immediate (Week 5):**
-- CI/CD pipelines OR Kubernetes basics
-- Building on container knowledge while fresh
 
 **Short-term (Weeks 6-10):**
 - Monitoring and observability deep dive
