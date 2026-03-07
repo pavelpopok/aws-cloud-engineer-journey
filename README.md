@@ -97,18 +97,27 @@
 - Complete ECS Fargate stack deployed entirely by Terraform
 - Full destroy/rebuild cycle proving infrastructure reproducibility
 
-**Time Investment:** ~X hours over 6 days
-**Cost:** ~$X
-
 **Learning Note:** Same infrastructure as Week 4 built in a fraction of the time. Terraform state clicked through practice, not theory — existing resources showed zero changes on reapply, only new additions were touched.
 
 ---
 
-## Week 6: CI/CD with GitHub Actions
-- Automated pipeline: code push → Docker build → ECR push → ECS deployment
-- Tests run before every deployment (pipeline fails if tests fail)
-- Zero manual steps from code change to production
-- Tools: GitHub Actions, aws-actions/configure-aws-credentials, aws-actions/amazon-ecr-login
+### Week 6: CI/CD — Automating ECS Deployments with GitHub Actions
+**Topics Covered:**
+- GitHub Actions workflow structure (triggers, jobs, steps, runners)
+- GitHub Secrets for secure credential management
+- AWS authentication from pipeline using IAM access keys
+- Docker build and ECR push automated on every code push
+- Image tagging strategy: commit SHA for traceability + latest for ECS
+- ECS task definition revision pattern (why you can't edit in place)
+- Rolling deployments with zero downtime
+- Test-driven pipeline: pytest blocking bad deployments before build
+- Failure handling with conditional steps
+
+**Lab Projects:**
+- Full CI/CD pipeline: git push → tests → Docker build → ECR push → ECS redeploy
+- Deliberately broken tests proving pipeline stops bad code reaching production
+
+**Learning Note:** The labs felt short compared to previous weeks but the complexity was in connecting everything built since Week 1: GitHub, Docker, ECR, ECS, IAM all working together automatically. The "aha moment" was seeing a text change in app.py appear live in the browser without touching AWS console once.
 
 ---
 
