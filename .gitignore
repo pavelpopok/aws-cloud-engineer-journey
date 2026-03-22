@@ -1,0 +1,26 @@
+# Terraform state files
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+
+# Terraform variable files (may contain secrets)
+*.tfvars
+
+# AWS credentials (never commit these)
+.aws/
+credentials
+
+# macOS garbage
+.DS_Store
+.AppleDouble
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+
+# Locust
+locustfile.py
