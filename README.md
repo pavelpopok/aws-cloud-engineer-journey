@@ -121,6 +121,38 @@
 
 ---
 
+## Week 7: CloudWatch Monitoring & Observability
+
+### What I Built
+- CloudWatch dashboard: ECS CPU, memory, ALB request count, 
+  response time, healthy host count
+- SNS email alerts for unhealthy hosts, high CPU, 5XX errors
+- CloudWatch Logs Insights queries for traffic analysis 
+  and error detection
+- Log-based custom metric (4XXErrorCount) bridging 
+  logs → metrics → dashboard
+- Auto scaling policies: CPU > 70% adds tasks, 
+  CPU < 30% removes tasks
+- All monitoring infrastructure codified in Terraform
+
+### What I Learned
+- Metrics answer WHAT broke, logs answer WHY it broke
+- Alarm evaluation periods prevent false alerts (2/3 vs 1/1)
+- Missing data treatment is context dependent 
+  (breaching for hosts, notBreaching for CPU)
+- Auto scaling needs 3 parts: target + policy + alarm
+- Scale up fast (60s cooldown), scale down slow (300s cooldown)
+- brew > pip on macOS (lesson learned the hard way)
+
+### What Surprised Me
+- CloudWatch keeps metrics from destroyed resources for 15 months
+- 100 concurrent users barely registers on a simple Flask app
+- Auto scaling scaled to 4 tasks (max) before I could blink
+- Infrastructure fixing itself without human involvement 
+  is genuinely satisfying
+
+
+---
 
 ## Current Skill Level
 
