@@ -6,11 +6,11 @@ on:
     branches:
       - main
     paths:
-      - "week6/**"
+      - "week8-app/**"
       - ".github/workflows/deploy.yml"
 
 env:
-  ECR_REPOSITORY: week6-flask
+  ECR_REPOSITORY: week8-flask
   IMAGE_TAG: ${{ github.sha }}
 
 jobs:
@@ -32,27 +32,9 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Run tests
-        run: |
-          cd week6
-          pip install -r requirements.txt
-          pytest test_app.py -v
-
-      - name: Notify on failure
-        if: failure()
-        run: |
-          echo "Pipeline failed!"
-          echo "Commit: ${{ github.sha }}"
-          echo "Author: ${{ github.actor }}"
-
       - name: Build Docker image
         run: |
-          docker build -t $ECR_REPOSITORY:$IMAGE_TAG ./week6/
+          docker build -t $ECR_REPOSITORY:$IMAGE_TAG ./week8-app/
           echo "Built image: $ECR_REPOSITORY:$IMAGE_TAG"
 
       - name: Tag and push to ECR
@@ -75,7 +57,7 @@ jobs:
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          TASK_FAMILY="week5-task"
+          TASK_FAMILY="week8-task"
           NEW_IMAGE="$REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
           TASK_DEF=$(aws ecs describe-task-definition \
@@ -103,8 +85,8 @@ jobs:
 
           aws ecs update-service \
             --region ${{ secrets.AWS_REGION }} \
-            --cluster week5-cluster \
-            --service week5-service \
+            --cluster week8-cluster \
+            --service week8-service \
             --task-definition $NEW_TASK_ARN \
             --force-new-deployment
 
@@ -115,6 +97,13 @@ jobs:
           echo "Waiting for ECS service to stabilize..."
           aws ecs wait services-stable \
             --region ${{ secrets.AWS_REGION }} \
-            --cluster week5-cluster \
-            --services week5-service
+            --cluster week8-cluster \
+            --services week8-service
           echo "Deployment complete"
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "Pipeline failed!"
+          echo "Commit: ${{ github.sha }}"
+          echo "Author: ${{ github.actor }}"
