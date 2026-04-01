@@ -154,6 +154,35 @@
 
 ---
 
+## Week 8: Secrets Management + RDS Integration
+
+**Architecture:** 4-tier stack — networking + compute + database + secrets
+
+**What I built:**
+- AWS Secrets Manager storing RDS credentials - never in code or plaintext env vars
+- AWS Parameter Store for non-sensitive configuration
+- RDS MySQL in private subnets - not publicly accessible, reachable only from ECS
+- DB subnet group spanning 2 AZs - AWS requirement even for single-AZ deployment
+- ECS task definition secrets block - credentials injected at container startup by ECS agent
+- Least-privilege IAM execution role scoped to week8/* secrets only
+- Security group chain: internet → ALB SG → ECS SG → RDS SG (identity-based, not CIDR)
+- Terraform data source reading password from Secrets Manager at apply time
+- CI/CD pipeline updated - git push triggers automatic build and ECS redeployment
+
+**Key concepts learned:**
+- Secrets Manager vs Parameter Store - sensitivity and rotation are the deciding factors
+- Envelope encryption — secrets encrypted with KMS data key, never stored in plaintext
+- ECS execution role vs task role — agent permissions vs application permissions
+- Secret versioning — AWSCURRENT, AWSPREVIOUS, AWSPENDING and why they exist
+- Rotation flow — four Lambda steps, zero application code changes needed
+- Terraform state file risk — tfstate contains plaintext secrets, must never be committed
+- `.endpoint` vs `.address` in Terraform — endpoint includes port, address is hostname only
+
+**Stack:** AWS Secrets Manager · Parameter Store · RDS MySQL 8.0 · ECS Fargate · ALB · 
+Terraform · GitHub Actions · Flask · Docker · ECR
+
+---
+
 ## Current Skill Level
 
 **Cloud Platforms:**
