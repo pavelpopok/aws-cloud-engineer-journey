@@ -61,7 +61,7 @@ jobs:
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          TASK_FAMILY="week8-task"
+          TASK_FAMILY="week5-task"
           NEW_IMAGE="$REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
           TASK_DEF=$(aws ecs describe-task-definition \
@@ -89,8 +89,8 @@ jobs:
 
           aws ecs update-service \
             --region ${{ secrets.AWS_REGION }} \
-            --cluster week8-cluster \
-            --service week8-service \
+            --cluster week5-cluster \
+            --service week5-service \
             --task-definition $NEW_TASK_ARN \
             --force-new-deployment
 
@@ -101,8 +101,8 @@ jobs:
           echo "Waiting for ECS service to stabilize..."
           aws ecs wait services-stable \
             --region ${{ secrets.AWS_REGION }} \
-            --cluster week8-cluster \
-            --services week8-service
+            --cluster week5-cluster \
+            --services week5-service
           echo "Deployment complete"
 
       - name: Notify on failure
