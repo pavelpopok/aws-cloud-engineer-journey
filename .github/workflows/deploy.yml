@@ -6,11 +6,11 @@ on:
     branches:
       - main
     paths:
-      - "week8-app/**"
+      - "week6-app/**"
       - ".github/workflows/deploy.yml"
 
 env:
-  ECR_REPOSITORY: week8-flask
+  ECR_REPOSITORY: week6-flask
   IMAGE_TAG: ${{ github.sha }}
   ECS_CLUSTER: week5-cluster
   ECS_SERVICE: week5-service
@@ -38,7 +38,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t $ECR_REPOSITORY:$IMAGE_TAG ./week8-app/
+          docker build -t $ECR_REPOSITORY:$IMAGE_TAG ./week6-app/
           echo "Built image: $ECR_REPOSITORY:$IMAGE_TAG"
 
       - name: Tag and push to ECR
