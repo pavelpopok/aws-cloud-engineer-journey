@@ -12,6 +12,10 @@ on:
 env:
   ECR_REPOSITORY: week8-flask
   IMAGE_TAG: ${{ github.sha }}
+  ECS_CLUSTER: week5-cluster
+  ECS_SERVICE: week5-service
+  TASK_FAMILY: week5-task
+  APP_URL: https://pavlopopok.click
 
 jobs:
   deploy:
@@ -107,3 +111,24 @@ jobs:
           echo "Pipeline failed!"
           echo "Commit: ${{ github.sha }}"
           echo "Author: ${{ github.actor }}"
+
+      - name: Verify deployment via HTTPS
+        run: |
+          echo "Verifying app is responding on HTTPS..."
+          sleep 10
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" $APP_URL)
+          if [ "$HTTP_STATUS" = "200" ]; then
+            echo "✅ Deployment verified — $APP_URL returned 200"
+          else
+            echo "❌ Health check failed — got HTTP $HTTP_STATUS"
+            exit 1
+          fi
+
+      - name: Verify HTTP redirects to HTTPS
+        run: |
+          REDIRECT=$(curl -s -o /dev/null -w "%{http_code}" http://pavlopopok.click)
+          if [ "$REDIRECT" = "301" ]; then
+            echo "✅ HTTP redirect working — got 301"
+          else
+            echo "⚠️  Expected 301, got $REDIRECT"
+          fi

@@ -28,7 +28,7 @@ def home():
         return jsonify(
             {
                 "status": "connected",
-                "message": "Flask connected to RDS via Secrets Manager — CI/CD working",
+                "message": "FLASK connected to RDS via Secrets Manager — CI/CD working?!",
                 "db_version": version,
                 "container": os.environ.get("HOSTNAME", "unknown"),
             }
