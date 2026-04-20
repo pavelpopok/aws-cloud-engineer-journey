@@ -183,6 +183,36 @@ Terraform · GitHub Actions · Flask · Docker · ECR
 
 ---
 
+## Week 9: HTTPS with ACM Certificates
+
+**Live at:** https://pavlopopok.click
+
+### What I built
+- Registered personal domain (pavlopopok.click) via Namecheap
+- Created Route 53 hosted zone manually, pointed Namecheap DNS to Route 53 nameservers
+- Requested free SSL certificate from AWS Certificate Manager (ACM)
+- DNS validation via Route 53 CNAME record — auto-renews forever with zero maintenance
+- ALB HTTPS listener on port 443 with TLS 1.3 policy (ELBSecurityPolicy-TLS13-1-2-2021-06)
+- HTTP→HTTPS permanent redirect (301) on port 80
+- Route 53 alias record pointing domain to ALB — no hardcoded IPs
+- CI/CD pipeline updated — deployment verification now uses HTTPS domain endpoint
+
+### Key concepts learned
+- **TLS termination at the ALB** — ECS containers keep receiving plain HTTP internally, the ALB handles encryption/decryption with browsers using the ACM certificate
+- **ACM DNS validation** — proving domain ownership by adding a CNAME record ACM can query; as long as that record stays in Route 53, ACM auto-renews the certificate forever
+- **Route 53 alias records vs CNAME** — alias is a Route 53-specific feature that points to another AWS resource by DNS name instead of IP; free, auto-updates if ALB IPs change, works on root domain (plain CNAME can't do that)
+- **HTTP 301 vs 302** — 301 is permanent redirect, browsers cache it and go straight to HTTPS on future visits without touching port 80
+- **Registrar vs hosted zone** — registrar (Namecheap) holds your domain reservation; hosted zone (Route 53) answers DNS queries for it; you can use different providers for each by updating nameservers
+- **ACM certificate region** — certificate must be in the same region as the resource using it; requesting in the wrong region silently fails at ALB attachment
+- **Wildcard SAN** — one certificate covers root domain and all subdomains via `*.pavlopopok.click`; always request alongside root at no extra cost
+
+### Gotchas documented
+- Route 53 domain registration blocked on Free Tier accounts — pivot to Namecheap + manual hosted zone
+- ALB HTTPS listener `default_action` must be `forward`, not `redirect` — redirect on port 443 creates an infinite loop
+- HTTP listener `target_group_arn` must be removed when changing action to `redirect` — Terraform errors if both are present
+- Security group port 443 rule must be added explicitly — HTTPS traffic is blocked at network level without it
+- Pipeline hardcoded cluster/service/task names override `env` block — always check step-level `env` for conflicts
+
 ## Current Skill Level
 
 **Cloud Platforms:**
@@ -217,7 +247,6 @@ Terraform · GitHub Actions · Flask · Docker · ECR
 
 ## Certifications
 
-- AWS Cloud Practitioner (expired 2026 - planning to renew)
 - GCP Associate Cloud Engineer (valid through June 2027)
 
 ---
