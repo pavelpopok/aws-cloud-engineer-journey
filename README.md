@@ -213,6 +213,34 @@ Terraform · GitHub Actions · Flask · Docker · ECR
 - Security group port 443 rule must be added explicitly — HTTPS traffic is blocked at network level without it
 - Pipeline hardcoded cluster/service/task names override `env` block — always check step-level `env` for conflicts
 
+---
+
+## Week 10: Advanced Terraform — Modules and Remote State
+
+Architecture: Same stack as Week 9 — networking + compute + ALB + HTTPS. Code quality upgraded from flat to modular.
+
+**What I built:**
+* Networking module — VPC, subnets, IGW, route tables, security groups as a reusable component
+* ALB module — load balancer, target group, HTTP→HTTPS redirect, HTTPS listener, Route 53 alias record
+* ECS module — cluster, task definition, IAM execution role, Fargate service, CloudWatch log group
+* Root module wiring all three together via module outputs — no direct cross-module resource references
+* S3 bucket for remote state — versioned, encrypted, public access blocked
+* DynamoDB table for state locking — prevents concurrent apply conflicts
+* State migrated from local laptop to S3 with `terraform init -migrate-state`
+* Staging configuration via `staging.tfvars` — same modules, different variable values
+
+**Key concepts learned:**
+* Terraform modules — reusable folders with their own variables, resources and outputs; root module is the orchestrator
+* Module outputs as the only communication channel — modules never reference each other's resources directly
+* Remote backend — tfstate in S3 means infrastructure is no longer tied to one machine
+* State locking — DynamoDB ensures only one `terraform apply` runs at a time
+* `.tfvars` files — override variable defaults at runtime, enabling staging/production pattern from one codebase
+* `terraform init -migrate-state` — moves existing local state to a new backend without losing resource tracking
+* Same modules deployable multiple times with different configurations — one source of truth
+
+**
+
+
 ## Current Skill Level
 
 **Cloud Platforms:**
